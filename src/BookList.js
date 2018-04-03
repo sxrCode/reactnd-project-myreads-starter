@@ -19,9 +19,7 @@ class BookList extends Component {
 
     changeShelf(oldShelf, book) {
         BooksAPI.update(book, book.shelf).then((res) => {
-            console.log("res: " + res);
             let newBooksArray = this.state.myBooks.map((mybook) => {
-                console.log("mybook.id: " + mybook.id + '; book.id: ' + book.id);
                 if (mybook.id === book.id) {
                     mybook = book;
                 }
@@ -57,7 +55,7 @@ class BookList extends Component {
                             <div className="bookshelf-books">
                                 <ol className="books-grid">
                                     {
-                                        curArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf} /></li>))
+                                        curArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf.bind(this)} /></li>))
                                     }
                                 </ol>
                             </div>
@@ -67,7 +65,7 @@ class BookList extends Component {
                             <div className="bookshelf-books">
                                 <ol className="books-grid">
                                     {
-                                        wantArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf} /></li>))
+                                        wantArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf.bind(this)} /></li>))
                                     }
                                 </ol>
                             </div>
@@ -77,7 +75,7 @@ class BookList extends Component {
                             <div className="bookshelf-books">
                                 <ol className="books-grid">
                                     {
-                                        readArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf} /></li>))
+                                        readArray.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf.bind(this)} /></li>))
                                     }
                                 </ol>
                             </div>
