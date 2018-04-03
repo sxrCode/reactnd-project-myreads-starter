@@ -5,7 +5,11 @@ class Book extends Component {
     selectShelf(e) {
         let value = e.target.value;
         let book = this.props.book;
-        let oldShelf = book.shelf;
+        //此图书原来未加入书架，则设置原来书架为none
+        let oldShelf = 'none';
+        if(book.shelf) {
+            oldShelf= book.shelf;
+        }
         book.shelf = value;
         this.props.onChangeShelf(oldShelf, book);
     };

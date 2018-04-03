@@ -10,6 +10,7 @@ class BookList extends Component {
     }
 
     componentDidMount() {
+        //组件挂载结束后更新状态
         BooksAPI.getAll().then((books) => {
             let dataBooks = books;
             this.setState({ myBooks: dataBooks });
@@ -18,6 +19,9 @@ class BookList extends Component {
     }
 
     changeShelf(oldShelf, book) {
+        if (book.shelf === 'none') {
+            return;//不支持移动到空书架
+        }
         BooksAPI.update(book, book.shelf).then((res) => {
             let newBooksArray = this.state.myBooks.map((mybook) => {
                 if (mybook.id === book.id) {
@@ -25,11 +29,13 @@ class BookList extends Component {
                 }
                 return mybook;
             });
+            //服务端更新成功后客户端要更新图书状态
             this.setState({ myBooks: newBooksArray });
         });
     }
 
     render() {
+        // 对我的所有图书进行分类
         let curArray = [];
         let wantArray = [];
         let readArray = [];
