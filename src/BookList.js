@@ -11,14 +11,17 @@ class BookList extends Component {
 
     componentDidMount() {
         BooksAPI.getAll().then((books) => {
-            this.setState({ myBooks: books });
+            let dataBooks = books;
+            this.setState({ myBooks: dataBooks });
+            return dataBooks;
         });
     }
 
     changeShelf(oldShelf, book) {
         BooksAPI.update(book, book.shelf).then((res) => {
-            console.log(res);
+            console.log("res: " + res);
             let newBooksArray = this.state.myBooks.map((mybook) => {
+                console.log("mybook.id: " + mybook.id + '; book.id: ' + book.id);
                 if (mybook.id === book.id) {
                     mybook = book;
                 }
@@ -85,7 +88,7 @@ class BookList extends Component {
                     <Link to='/search' onClick={() => this.setState({ showSearchPage: true })}>Add a book</Link>
                 </div>
             </div>
-        )
+        );
     }
 }
 
