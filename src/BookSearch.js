@@ -9,90 +9,63 @@ class BookSearch extends Component {
     state = {
         search: '',
         searchBooks: [],
-        myBooks: [],
     }
 
-    componentDidMount() {
-        //组件挂载结束后抓取‘我的图书’
-        BooksAPI.getAll().then((books) => {
-            let dataBooks = books;
-            this.setState({ myBooks: dataBooks });
-            return dataBooks;
-        });
+    constructor(props) {
+        super(props);
+        this.handleSearchChange = this.handleSearchChange.bind(this);
     }
 
     handleSearchChange(e) { // 受控组件
         let searchText = e.target.value.trim();
         this.setState({ search: searchText });
-        let testResult = terms.find((term) => { 
-            return term === searchText;
+        let testResult = terms.find((term) => { // 与输入匹配开头的第一个关键词
+            return 0 === term.indexOf(searchText);
         });
-        if (testResult) {//符合搜索术语则进行搜索
+        if (testResult) {//对关键词进行搜索
             BooksAPI.search(testResult).then((searchBooks) => {
-                //查询后，将其中已经放到书架的图书同步状态
-                let newSearchBooks = searchBooks.map((searchBook) => {
-                    for (let mybook of this.state.myBooks) {
-                        if (mybook.title === searchBook.title && mybook.subtitle === searchBook.subtitle) {
-                            searchBook = mybook;
-                            break;
-                        }
-                    }
-                    return searchBook;
-                });
-                this.setState({ searchBooks: newSearchBooks });
+                this.syncBookState(searchBooks);
             });
         }
     }
 
-    changeShelf(oldShelf, book) {
-        if (book.shelf === 'none') {
-            return;//不支持移动到空书架
+    syncBookState(searchBooks) {
+        //与已经放到书架的图书同步状态
+        if (!searchBooks) {
+            searchBooks = this.state.searchBooks;
         }
 
-        BooksAPI.update(book, book.shelf).then((res) => {
-            let newBooksArray = this.state.myBooks;
-            //服务端更新成功后客户端要更新图书状态
-            if('none' === oldShelf || !oldShelf) {
-                newBooksArray.push(book);
-            } else {
-                newBooksArray = this.state.myBooks.map((mybook) => {
-                    if (mybook.id === book.id) {
-                        mybook = book;
-                    }
-                    return mybook;
-                });
-            }
-   
-            //更新图书后同步我的图书和查询结果图书的状态
-            let searchBooks = this.state.searchBooks.map((searchBook) => {
-                for (let mybook of newBooksArray) {
-                    if (mybook.title === searchBook.title && mybook.subtitle === searchBook.subtitle) {
-                        searchBook = mybook;
-                        break;
-                    }
+        let newSearchBooks = searchBooks.map((searchBook) => {
+            for (let mybook of this.props.myBooks) {
+                if (mybook.title === searchBook.title && mybook.subtitle === searchBook.subtitle) {
+                    searchBook = mybook;
+                    break;
                 }
-                return searchBook;
-            });
-            this.setState({ searchBooks: searchBooks, myBooks: newBooksArray });
-            
+            }
+            return searchBook;
         });
+
+        this.setState({ searchBooks: newSearchBooks });
+    }
+
+    componentWillReceiveProps() {
+        this.syncBookState();
     }
 
     render() {
-
         return (
             <div className="search-books">
                 <div className="search-books-bar">
                     <Link to='/' className="close-search" >Close</Link>
                     <div className="search-books-input-wrapper">
-                        <input type="text" placeholder="Search by title or author" value={this.state.search} onChange={this.handleSearchChange.bind(this)} />
+                        <input type="text" placeholder="Search by title or author" value={this.state.search} onChange={this.handleSearchChange} />
 
                     </div>
                 </div>
                 <div className="search-books-results">
                     <ol className="books-grid">
                         {
-                            this.state.searchBooks.map((value, index) => (<li key={value.id}><Book book={value} onChangeShelf={this.changeShelf.bind(this)} /></li>))
+                            this.state.searchBooks.map((value, index) => (<li key={index}><Book book={value} onChangeShelf={this.props.changeShelf} /></li>))
                         }
                     </ol>
                 </div>
